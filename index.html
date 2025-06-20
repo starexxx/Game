@@ -3,158 +3,383 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coin Game</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Bitcoin Flip Game</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-dark: #000;
+            --bg-darker: #121212;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #10b981;
+            --success-dark: #059669;
+            --danger: #ef4444;
+            --danger-dark: #dc2626;
+            --warning: #f59e0b;
+            --warning-dark: #d97706;
+            --bitcoin: #f7931a;
+            --bitcoin-dark: #e2780d;
+            --text-light: #f8fafc;
+            --text-dim: #888888;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent
+        }
+        
         @keyframes flip {
             0% { transform: rotateY(0deg); }
             50% { transform: rotateY(180deg); }
             100% { transform: rotateY(360deg); }
         }
+        
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
+        
         @keyframes slideDown {
             from { transform: translateY(-20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
+        
         @keyframes fadeOut {
             from { opacity: 1; }
             to { opacity: 0; }
         }
+        
         .flipping { animation: flip 1s ease-in-out; }
         .pulse { animation: pulse 2s infinite; }
+        
         .notification {
             position: fixed;
-            top: 20px;
+            top: 600px;
             left: 50%;
             transform: translateX(-50%);
-            animation: slideDown 0.3s, fadeOut 0.5s 2.5s forwards;
+            animation: fadeOut 0.3s 2.7s forwards;
             z-index: 1000;
-            max-width: 90%;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: #252525;
+            padding: 12px 24px;
+            font-size: 13px;
+            font-weight: 400;
         }
-        .tab-underline {
+        
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+        
+        header {
+            background-color: var(--bg-dark);
+            padding: 10px;
+            
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .tab {
+            padding: 8px 16px;
+            font-weight: 500;
             position: relative;
+            cursor: pointer;
+            color: #888;
         }
-        .tab-underline::after {
+        
+        .tab.active {
+            color: var(--text-light);
+        }
+        
+        .tab.active::after {
             content: '';
             position: absolute;
             bottom: -8px;
             left: 0;
             width: 100%;
-            height: 3px;
-            background: #3b82f6;
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
+            height: 2px;
+            background: white;
         }
-        .tab-underline.active::after {
-            transform: scaleX(1);
+        
+        .page {
+            display: none;
         }
-        .page-transition {
-            transition: opacity 0.3s ease, transform 0.3s ease;
+        
+        .page.active {
+            display: block;
         }
-        .page-enter {
-            opacity: 0;
-            transform: translateX(20px);
+        
+        .coin {
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, var(--bitcoin), var(--bitcoin-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 32px auto;
+            border: 4px solid rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 20px rgba(247, 147, 26, 0.3);
         }
-        .page-enter-active {
-            opacity: 1;
-            transform: translateX(0);
+        
+        .coin i {
+            font-size: 48px;
+            color: rgba(0, 0, 0, 0.7);
         }
-        .page-exit {
-            opacity: 1;
-            transform: translateX(0);
+        
+        .bet-amount {
+            width: 91%;
+            padding: 16px;
+            background-color: var(--bg-darker);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 24px;
+            outline: none;
         }
-        .page-exit-active {
-            opacity: 0;
-            transform: translateX(-20px);
+        
+        .bet-amount::placeholder {
+            color: var(--text-dim);
+        }
+        
+        .bet-buttons {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .bet-button {
+            flex: 1;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .bet-button.head {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .bet-button.head:hover {
+            background-color: var(--success-dark);
+        }
+        
+        .bet-button.tail {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .bet-button.tail:hover {
+            background-color: var(--danger-dark);
+        }
+        
+        .wallet-card {
+            background-color: var(--bg-darker);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .balance {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 8px 0;
+        }
+        
+        .balance-label {
+            color: var(--text-dim);
+            font-size: 14px;
+        }
+        
+        .savings-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .savings-input {
+            flex: 1;
+            padding: 12px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-light);
+            outline: none;
+        }
+        
+        .action-button {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .action-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .special-event {
+            background-color: #000;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .event-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .event-timer {
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+        
+        .event-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--warning), var(--warning-dark));
+            border-radius: 8px;
+            border: none;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .event-button:hover {
+            transform: scale(1.02);
+        }
+        
+        .event-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .history-item {
+            background-color: var(--bg-dark);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .history-icon {
+            margin-right: 12px;
+        }
+        
+        .history-details {
+            flex: 1;
+        }
+        
+        .history-amount {
+            font-weight: 600;
+        }
+        
+        .history-time {
+            font-size: 12px;
+            color: var(--text-dim);
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white">
+<body>
     <div id="notificationArea"></div>
     
-    <header class="sticky top-0 z-10 bg-gray-900 p-4">
-        <div class="flex justify-around">
-            <button class="tab-underline px-4 py-2 font-medium" data-tab="home">
-                <i class="fas fa-home mr-2"></i>Home
-            </button>
-            <button class="tab-underline px-4 py-2 font-medium" data-tab="history">
-                <i class="fas fa-history mr-2"></i>History
-            </button>
-            <button class="tab-underline px-4 py-2 font-medium" data-tab="wallet">
-                <i class="fas fa-wallet mr-2"></i>Wallet
-            </button>
+    <header>
+        <div class="tabs">
+            <div class="tab active" data-tab="home">
+                Home
+            </div>
+            <div class="tab" data-tab="history">
+                History
+            </div>
+            <div class="tab" data-tab="wallet">
+                <i class="fas fa-wallet"></i>
+            </div>
         </div>
     </header>
     
-    <div class="container mx-auto px-4 py-4 max-w-md relative min-h-[80vh]">
-        <div id="home-page" class="page-transition">
-            <div class="flex flex-col items-center py-8">
-                <div class="coin w-32 h-32 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-lg border-4 border-yellow-700 mb-8" id="coin">
-                    <i class="fas fa-question text-4xl text-yellow-800"></i>
-                </div>
-                
-                <div class="w-full mb-6">
-                    <input type="number" id="betAmount" class="outline-none w-full p-4 rounded-xl bg-gray-700 text-white text-left text-xl font-bold" min="1" placeholder="Bet Amount" value="">
-                </div>
-                
-                <div class="flex gap-4 mb-8 w-full">
-                    <button id="headBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 px-4 py-4 rounded-xl font-bold text-white shadow-lg">
-                        <i class="fas fa-play mr-2"></i>Play for Heads
-                    </button>
-                    <button id="tailBtn" class="flex-1 bg-red-600 hover:bg-red-700 px-4 py-4 rounded-xl font-bold text-white shadow-lg">
-                        <i class="fas fa-play mr-2"></i>Play for Tails
-                    </button>
-                </div>
+    <div class="container">
+        <div id="home-page" class="page active">
+            <div class="coin" id="coin">
+                <i class="fas fa-question"></i>
+            </div>
+            
+            <input type="number" id="betAmount" class="bet-amount" min="1" placeholder="Enter bet amount">
+            
+            <div class="bet-buttons">
+                <button id="headBtn" class="bet-button head">
+                    Play for Heads
+                </button>
+                <button id="tailBtn" class="bet-button tail">
+                    Play for Tails
+                </button>
             </div>
         </div>
         
-        <div id="history-page" class="page-transition hidden">
-            <div class="py-4">
-                <div id="history" class="space-y-3"></div>
-            </div>
+        <div id="history-page" class="page">
+            <div id="history"></div>
         </div>
         
-        <div id="wallet-page" class="page-transition hidden">
-            <div class="py-4">
-                <div class="bg-gray-800 rounded-xl p-6 mb-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <div>
-                            <div class="text-gray-400">Your Balance</div>
-                            <div id="balance" class="text-3xl font-bold">1000</div>
-                        </div>
-                        <div class="bg-gray-800 p-4 rounded-lg">
-                            <div class="text-gray-400">Savings</div>
-                            <div id="savedBalance" class="text-xl font-bold">0</div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex gap-2 mb-4">
-                        <input type="number" id="savingAmount" class="outline-none flex-1 p-3 rounded-lg bg-gray-700 text-white text-left" placeholder="Amount" value="">
-                        <button id="depositBtn" class="bg-transparent hover:bg-transparent px-4 py-3 rounded-lg">
-                            <i class="fas fa-arrow-up mr-1"></i>
-                        </button>
-                        <button id="withdrawBtn" class="bg-transparent hover:bg-transparent px-4 py-3 rounded-lg">
-                            <i class="fas fa-arrow-down mr-1"></i>
-                        </button>
-                    </div>
-                </div>
+        <div id="wallet-page" class="page">
+            <div class="wallet-card">
+                <div class="balance-label">Your Balance</div>
+                <div id="balance" class="balance">1.000000</div>
                 
-                <div class="bg-gray-900 rounded-xl p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <div class="text-xl font-bold mb-1">Special Event</div>
-                            <div id="luckTimer" class="text-sm text-gray-400"></div>
-                        </div>
-                        <button id="luckBtn" class="pulse bg-gradient-to-r from-pink-600 to-purple-600 px-6 py-3 rounded-lg font-bold">
-                            <i class="fas fa-gift mr-2"></i>Free Coins
-                        </button>
+                <div class="balance-label" style="margin-top: 16px;">Savings</div>
+                <div id="savedBalance" class="balance" style="font-size: 24px;">0.000000</div>
+                
+                <div class="savings-actions">
+                    <input type="number" id="savingAmount" class="savings-input" placeholder="BTC Amount">
+                    <button id="depositBtn" class="action-button">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button id="withdrawBtn" class="action-button">
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="special-event">
+                <div class="event-header">
+                    <div>
+                        <div class="event-title">Special Event</div>
+                        <div id="luckTimer" class="event-timer"></div>
                     </div>
+                    <button id="luckBtn" class="event-button pulse">
+                        <i class="fas fa-gift mr-2"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -162,8 +387,8 @@
 
     <script>
         let userData = {
-            balance: 1000,
-            savedBalance: 0,
+            balance: 1.000000,
+            savedBalance: 0.000000,
             lastLuckTime: 0,
             luckCooldown: 0,
             history: []
@@ -182,12 +407,8 @@
         const luckBtn = document.getElementById('luckBtn');
         const luckTimerEl = document.getElementById('luckTimer');
         const notificationArea = document.getElementById('notificationArea');
-        const tabButtons = document.querySelectorAll('.tab-underline');
-        const pages = {
-            home: document.getElementById('home-page'),
-            history: document.getElementById('history-page'),
-            wallet: document.getElementById('wallet-page')
-        };
+        const tabs = document.querySelectorAll('.tab');
+        const pages = document.querySelectorAll('.page');
 
         let isFlipping = false;
         let userChoice = null;
@@ -198,73 +419,75 @@
             updateUI();
             setupEventListeners();
             checkLuckCooldown();
-            switchTab('home');
         }
 
         function loadUserData() {
-            const savedData = localStorage.getItem('kidsCoinGameData');
+            const savedData = localStorage.getItem('btcFlipGameData');
             if (savedData) userData = JSON.parse(savedData);
             saveUserData();
         }
 
         function saveUserData() {
-            localStorage.setItem('kidsCoinGameData', JSON.stringify(userData));
+            localStorage.setItem('btcFlipGameData', JSON.stringify(userData));
         }
 
         function updateUI() {
-            balanceEl.textContent = userData.balance;
-            savedBalanceEl.textContent = userData.savedBalance;
+            balanceEl.textContent = userData.balance.toFixed(6);
+            savedBalanceEl.textContent = userData.savedBalance.toFixed(6);
             
-            historyEl.innerHTML = userData.history.map(item => {
-                const resultClass = item.result === 'win' ? 'text-green-400' : 'text-red-400';
-                const icon = item.result === 'win' ? 'fa-check-circle' : 'fa-times-circle';
-                return `
-                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
-                    <div class="flex items-center">
-                        <i class="fas ${icon} ${resultClass} mr-3"></i>
-                        <span class="font-medium">${item.choice === 'head' ? 'HEAD' : 'TAIL'}</span>
+            historyEl.innerHTML = '';
+            userData.history.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = `history-item ${item.result}`;
+                historyItem.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <i class="fas ${item.result === 'win' ? 'fa-check-circle' : 'fa-times-circle'} history-icon" 
+                           style="color: ${item.result === 'win' ? 'var(--success)' : 'var(--danger)'}"></i>
+                        <div class="history-details">
+                            <div>${item.choice === 'head' ? 'HEADS' : 'TAILS'}</div>
+                            <div class="history-time">${new Date(item.timestamp).toLocaleTimeString()}</div>
+                        </div>
                     </div>
-                    <div class="flex items-center">
-                        <span class="${resultClass} font-bold mr-2">${item.result === 'win' ? '+' : '-'}${item.amount}</span>
-                        <span class="text-xs text-gray-400">${new Date(item.timestamp).toLocaleTimeString()}</span>
+                    <div class="history-amount" style="color: ${item.result === 'win' ? 'var(--success)' : 'var(--danger)'}">
+                        ${item.result === 'win' ? '+' : '-'}${item.amount.toFixed(6)} BTC
                     </div>
-                </div>`;
-            }).join('');
+                `;
+                historyEl.appendChild(historyItem);
+            });
         }
 
         function showNotification(message, type = 'info') {
-            const colors = {
-                info: 'bg-blue-600',
-                success: 'bg-green-600',
-                error: 'bg-red-600',
-                warning: 'bg-yellow-600'
-            };
-            
             const notification = document.createElement('div');
-            notification.className = `notification ${colors[type]} text-white p-4 rounded-lg text-center shadow-lg`;
-            notification.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>${message}`;
+            notification.className = `notification`;
+            
+            let icon = 'fa-info-circle';
+            if (type === 'success') icon = 'fa-check-circle';
+            else if (type === 'error') icon = 'fa-exclamation-circle';
+            else if (type === 'warning') icon = 'fa-exclamation-triangle';
+            
+            notification.innerHTML = `${message}`;
+            
+            if (type === 'success') {
+                notification.style.borderColor = 'var(--success)';
+            } else if (type === 'error') {
+                notification.style.borderColor = 'var(--danger)';
+            } else if (type === 'warning') {
+                notification.style.borderColor = 'var(--warning)';
+            } else {
+                notification.style.borderColor = 'var(--primary)';
+            }
             
             notificationArea.appendChild(notification);
             setTimeout(() => notification.remove(), 3000);
         }
 
         function switchTab(tabName) {
-            tabButtons.forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
+            tabs.forEach(tab => {
+                tab.classList.toggle('active', tab.getAttribute('data-tab') === tabName);
             });
             
-            Object.entries(pages).forEach(([name, page]) => {
-                if (name === tabName) {
-                    page.classList.remove('hidden');
-                    page.classList.add('page-enter-active');
-                    setTimeout(() => page.classList.remove('page-enter'), 300);
-                } else {
-                    page.classList.add('page-exit');
-                    setTimeout(() => {
-                        page.classList.add('hidden');
-                        page.classList.remove('page-exit');
-                    }, 300);
-                }
+            pages.forEach(page => {
+                page.classList.toggle('active', page.id === `${tabName}-page`);
             });
         }
 
@@ -283,23 +506,23 @@
             withdrawBtn.addEventListener('click', withdrawFromSaving);
             luckBtn.addEventListener('click', tryLuck);
             
-            tabButtons.forEach(btn => {
-                btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.getAttribute('data-tab')));
             });
         }
 
         function placeBet() {
             if (isFlipping) return;
             
-            const amount = parseInt(betAmountEl.value);
+            const amount = parseFloat(betAmountEl.value);
             
-            if (isNaN(amount) || amount < 1) {
-                showNotification('Enter valid bet amount!', 'error');
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('Enter valid BTC amount!', 'error');
                 return;
             }
             
             if (amount > userData.balance) {
-                showNotification('Not enough coins!', 'error');
+                showNotification('Not enough BTC!', 'error');
                 return;
             }
             
@@ -314,14 +537,14 @@
             if (isFlipping) return;
             
             isFlipping = true;
-            coinEl.innerHTML = '<i class="fas fa-spinner fa-spin text-4xl text-yellow-800"></i>';
+            coinEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             coinEl.classList.add('flipping');
             
             [headBtn, tailBtn].forEach(btn => btn.disabled = true);
             
             setTimeout(() => {
                 const result = Math.random() < 0.5 ? 'head' : 'tail';
-                coinEl.innerHTML = result === 'head' ? '<i class="fas fa-smile text-4xl text-yellow-800"></i>' : '<i class="fas fa-paw text-4xl text-yellow-800"></i>';
+                coinEl.innerHTML = result === 'head' ? '<i class="fas fa-smile"></i>' : '<i class="fas fa-paw"></i>';
                 coinEl.classList.remove('flipping');
                 isFlipping = false;
                 
@@ -332,9 +555,9 @@
 
         function processBetResult(isWin) {
             if (isWin) {
-                const winAmount = Math.floor(currentBetAmount * 1.5);
+                const winAmount = currentBetAmount * 2;
                 userData.balance += winAmount;
-                showNotification(`You won ${winAmount} coins!`, 'success');
+                showNotification(`You won ${winAmount.toFixed(6)} BTC!`, 'success');
                 
                 userData.history.unshift({
                     choice: userChoice,
@@ -343,7 +566,7 @@
                     timestamp: new Date().toISOString()
                 });
             } else {
-                showNotification(`You lost ${currentBetAmount} coins`, 'error');
+                showNotification(`You lost ${currentBetAmount.toFixed(6)} BTC`, 'error');
                 
                 userData.history.unshift({
                     choice: userChoice,
@@ -359,15 +582,15 @@
         }
 
         function depositToSaving() {
-            const amount = parseInt(savingAmountEl.value);
+            const amount = parseFloat(savingAmountEl.value);
             
-            if (isNaN(amount) || amount < 1) {
-                showNotification('Enter valid amount!', 'error');
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('Enter valid BTC amount!', 'error');
                 return;
             }
             
             if (amount > userData.balance) {
-                showNotification('Not enough coins!', 'error');
+                showNotification('Not enough BTC!', 'error');
                 return;
             }
             
@@ -376,14 +599,14 @@
             savingAmountEl.value = '';
             saveUserData();
             updateUI();
-            showNotification(`Deposited ${amount} coins!`, 'success');
+            showNotification(`Deposited ${amount.toFixed(6)} BTC!`, 'success');
         }
 
         function withdrawFromSaving() {
-            const amount = parseInt(savingAmountEl.value);
+            const amount = parseFloat(savingAmountEl.value);
             
-            if (isNaN(amount) || amount < 1) {
-                showNotification('Enter valid amount!', 'error');
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('Enter valid BTC amount!', 'error');
                 return;
             }
             
@@ -397,7 +620,7 @@
             savingAmountEl.value = '';
             saveUserData();
             updateUI();
-            showNotification(`Withdrew ${amount} coins!`, 'success');
+            showNotification(`Withdrew ${amount.toFixed(6)} BTC!`, 'success');
         }
 
         function tryLuck() {
@@ -410,15 +633,15 @@
                 return;
             }
             
-            const randomCoins = Math.floor(Math.random() * (500 - 100 + 1)) + 100;
-            userData.balance += randomCoins;
+            const randomBTC = (Math.floor(Math.random() * (50000 - 10000 + 1)) + 10000) / 1000000;
+            userData.balance += randomBTC;
             userData.lastLuckTime = now;
             userData.luckCooldown = Math.floor(Math.random() * 10) + 1;
             
             saveUserData();
             updateUI();
             checkLuckCooldown();
-            showNotification(`You got ${randomCoins} coins!`, 'success');
+            showNotification(`You got ${randomBTC.toFixed(6)} BTC!`, 'success');
         }
 
         function checkLuckCooldown() {
@@ -430,7 +653,7 @@
                 const minutes = Math.floor(remainingTime / 60);
                 const seconds = remainingTime % 60;
                 
-                luckTimerEl.textContent = `Next bonus in ${minutes}m ${seconds}s`;
+                luckTimerEl.textContent = `Free coins in ${minutes}m ${seconds}s`;
                 luckBtn.disabled = true;
                 luckBtn.classList.remove('pulse');
                 setTimeout(checkLuckCooldown, 1000);
@@ -444,4 +667,4 @@
         init();
     </script>
 </body>
-  </html>
+</html>
